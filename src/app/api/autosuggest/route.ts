@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { azureOpenAI } from '@/lib/azure-openai';
+import { getAzureOpenAI } from '@/lib/azure-openai';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -145,6 +145,8 @@ RULES:
 5. No numbers, bullets, or explanations
 
 OUTPUT ${maxSuggestions} SUGGESTIONS:`;
+
+    const azureOpenAI = getAzureOpenAI();
 
     const response = await azureOpenAI.chat.completions.create({
       model: process.env.AZURE_OPENAI_DEPLOYMENT_NAME || 'gpt-4o-mini',
