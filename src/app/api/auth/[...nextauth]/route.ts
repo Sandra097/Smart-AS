@@ -1,6 +1,15 @@
-import NextAuth from 'next-auth';
-import { authOptions } from '@/lib/auth';
+// Lazy initialize NextAuth to avoid initializing the Prisma adapter at build time
+// This prevents build-time failures on platforms without the DB (e.g., Vercel using SQLite)
+export const GET = async (request: Request) => {
+  const { authOptions } = await import('@/lib/auth');
+  const NextAuth = (await import('next-auth')).default;
+  const handler = NextAuth(authOptions);
+  return handler(request as any);
+};
 
-const handler = NextAuth(authOptions);
-
-export { handler as GET, handler as POST };
+export const POST = async (request: Request) => {
+  const { authOptions } = await import('@/lib/auth');
+  const NextAuth = (await import('next-auth')).default;
+  const handler = NextAuth(authOptions);
+  return handler(request as any);
+};
