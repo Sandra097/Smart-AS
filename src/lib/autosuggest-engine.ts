@@ -497,10 +497,12 @@ function applyStyle(text: string, style: AutosuggestConfig['style'], writingStyl
 // Get user display info for UI
 export function getUserDisplayInfo(profile: UserProfile): {
   ctrLabel: string;
-  ctrColor: string;
+  ctrBg: string;
+  ctrText: string;
   ctrScore: string;
   speedLabel: string;
-  speedColor: string;
+  speedBg: string;
+  speedText: string;
   keystrokeInterval: string;
   triggerMode: string;
   triggerDetails: string;
@@ -511,21 +513,24 @@ export function getUserDisplayInfo(profile: UserProfile): {
   topicsOfInterest: string[];
   description: string;
 } {
-  const ctrLabels: Record<string, { label: string; color: string }> = {
-    'zero': { label: 'Zero CTR', color: 'bg-gray-500' },
-    'low': { label: 'Low CTR', color: 'bg-yellow-500' },
-    'medium': { label: 'Medium CTR', color: 'bg-blue-500' },
-    'high': { label: 'High CTR', color: 'bg-green-500' },
-    'very_high': { label: 'Very High CTR', color: 'bg-purple-500' },
+  // Streamlined color palette for readability (fewer distinct hues)
+  const ctrLabels: Record<string, { label: string; bg: string; text: string }> = {
+    'zero': { label: 'Zero CTR', bg: 'bg-gray-500', text: 'text-white' },
+    'low': { label: 'Low CTR', bg: 'bg-yellow-400', text: 'text-gray-900' },
+    'medium': { label: 'Medium CTR', bg: 'bg-blue-500', text: 'text-white' },
+    'high': { label: 'High CTR', bg: 'bg-green-500', text: 'text-white' },
+    // Very high uses the same hue as High but a stronger shade to keep patterns consistent
+    'very_high': { label: 'Very High CTR', bg: 'bg-green-700', text: 'text-white' },
   };
 
-  const speedLabels: Record<string, { label: string; color: string; interval: string }> = {
-    'ultra_fast': { label: 'Ultra-Fast', color: 'bg-red-500', interval: '≤ 150 ms' },
-    'fast': { label: 'Fast', color: 'bg-orange-400', interval: '200–300 ms' },
-    'moderate': { label: 'Moderate', color: 'bg-yellow-400', interval: '400–700 ms' },
-    'slow': { label: 'Slow', color: 'bg-green-400', interval: '1–2 s' },
-    'very_slow': { label: 'Very Slow', color: 'bg-teal-400', interval: '2–4 s' },
-  };
+  const speedLabels: Record<string, { label: string; bg: string; text: string; interval: string }> = {
+    // Compress fast categories into a single 'fast' color, moderate stands alone, slow categories share a hue
+    'ultra_fast': { label: 'Ultra-Fast', bg: 'bg-red-400', text: 'text-white', interval: '≤ 150 ms' },
+    'fast': { label: 'Fast', bg: 'bg-red-400', text: 'text-white', interval: '200–300 ms' },
+    'moderate': { label: 'Moderate', bg: 'bg-yellow-400', text: 'text-gray-900', interval: '400–700 ms' },
+    'slow': { label: 'Slow', bg: 'bg-teal-400', text: 'text-white', interval: '1–2 s' },
+    'very_slow': { label: 'Very Slow', bg: 'bg-teal-600', text: 'text-white', interval: '2–4 s' },
+  }; 
 
   // Get config based on profile to determine actual trigger behavior
   const config = getAutosuggestConfig(profile);
@@ -577,10 +582,12 @@ export function getUserDisplayInfo(profile: UserProfile): {
 
   return {
     ctrLabel: ctrLabels[profile.ctrCategory]?.label || 'Unknown',
-    ctrColor: ctrLabels[profile.ctrCategory]?.color || 'bg-gray-400',
+    ctrBg: ctrLabels[profile.ctrCategory]?.bg || 'bg-gray-400',
+    ctrText: ctrLabels[profile.ctrCategory]?.text || 'text-white',
     ctrScore: `${(profile.ctrScore * 100).toFixed(0)}%`,
     speedLabel: speedInfo.label,
-    speedColor: speedInfo.color,
+    speedBg: speedInfo.bg,
+    speedText: speedInfo.text,
     keystrokeInterval: speedInfo.interval,
     triggerMode: triggerInfo.mode,
     triggerDetails: triggerInfo.details,

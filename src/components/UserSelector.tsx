@@ -111,22 +111,44 @@ export default function UserSelector() {
 
   const behaviors = getBehaviorSummary();
 
+  // Static color mappings (Tailwind classes) so JIT picks up colors and they render reliably
+  // Streamlined style maps so patterns are easier to scan
+  const CTR_STYLES: Record<string, { bg: string; text: string }> = {
+    zero: { bg: 'bg-gray-500', text: 'text-white' },
+    low: { bg: 'bg-yellow-400', text: 'text-gray-900' },
+    medium: { bg: 'bg-blue-500', text: 'text-white' },
+    high: { bg: 'bg-green-500', text: 'text-white' },
+    very_high: { bg: 'bg-green-700', text: 'text-white' },
+  };
+
+  const SPEED_STYLES: Record<string, { bg: string; text: string }> = {
+    ultra_fast: { bg: 'bg-red-400', text: 'text-white' },
+    fast: { bg: 'bg-red-400', text: 'text-white' },
+    moderate: { bg: 'bg-yellow-400', text: 'text-gray-900' },
+    slow: { bg: 'bg-teal-400', text: 'text-white' },
+    very_slow: { bg: 'bg-teal-600', text: 'text-white' },
+  };
+
+  // Selected user styles (avoid dynamic class strings so Tailwind includes them)
+  const selectedCtr = CTR_STYLES[selectedUserProfile.ctrCategory];
+  const selectedSpeed = SPEED_STYLES[selectedUserProfile.typingSpeedCategory];
+
   return (
     <div ref={dropdownRef} className="flex flex-col gap-3">
       {/* Compact User Selector Button - Made more prominent */}
       <div className="relative">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-800 border-2 border-blue-400 dark:border-blue-500 rounded-xl hover:bg-blue-50 dark:hover:bg-gray-700 hover:border-blue-500 transition-all shadow-lg"
+          className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-800 !text-gray-900 dark:!text-gray-100 border-2 border-blue-400 dark:border-blue-500 rounded-xl hover:bg-blue-50 dark:hover:bg-gray-700 hover:border-blue-500 transition-all shadow-lg"
         >
-          <div className={`w-9 h-9 rounded-full flex items-center justify-center ${userInfo.ctrColor} shadow-md`}>
-            <User className="w-5 h-5 text-white" />
+          <div className={`w-9 h-9 rounded-full flex items-center justify-center ${selectedCtr.bg} shadow-md`}>
+            <User className={`w-5 h-5 ${selectedCtr.text}`} />
           </div>
           <div className="flex flex-col items-start">
-            <span className="text-sm font-bold text-gray-900 dark:text-white">
+            <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
               {selectedUserProfile.userId.split('_').pop()}
             </span>
-            <span className="text-xs text-gray-500">{userInfo.ctrLabel} • {userInfo.speedLabel}</span>
+            <span className="text-xs !text-gray-500 dark:!text-gray-300">{userInfo.ctrLabel} • {userInfo.speedLabel}</span>
           </div>
           <ChevronDown className={`w-5 h-5 text-blue-500 transition-transform ml-1 ${isOpen ? 'rotate-180' : ''}`} />
         </button>
@@ -154,6 +176,10 @@ export default function UserSelector() {
                   const info = getUserInfo(user);
                   const isSelected = user.userId === selectedUserId;
 
+                  // Use static style maps (Tailwind picks these up from source)
+                  const ctrStyle = CTR_STYLES[user.ctrCategory];
+                  const speedStyle = SPEED_STYLES[user.typingSpeedCategory];
+
                   return (
                     <button
                       key={user.userId}
@@ -161,13 +187,13 @@ export default function UserSelector() {
                         setSelectedUserId(user.userId);
                         setIsOpen(false);
                       }}
-                      className={`w-full px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors border-b border-gray-100 dark:border-gray-700/50 last:border-b-0 ${
+                      className={`w-full px-3 py-2 text-left !text-gray-900 dark:!text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors border-b border-gray-100 dark:border-gray-700/50 last:border-b-0 ${
                         isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${info.ctrColor}`}>
-                          <User className="w-4 h-4 text-white" />
+                        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${ctrStyle.bg}`}>
+                          <User className={`w-4 h-4 ${ctrStyle.text}`} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1">
@@ -177,10 +203,10 @@ export default function UserSelector() {
                             {isSelected && <Check className="w-3 h-3 text-blue-600" />}
                           </div>
                           <div className="flex items-center gap-1 mt-0.5">
-                            <span className={`text-[9px] px-1 py-0.5 rounded text-white ${info.ctrColor}`}>
+                            <span className={`text-[9px] px-1 py-0.5 rounded ${ctrStyle.text} ${ctrStyle.bg} shadow-sm`}>
                               {info.ctrLabel}
                             </span>
-                            <span className={`text-[9px] px-1 py-0.5 rounded text-white ${info.speedColor}`}>
+                            <span className={`text-[9px] px-1 py-0.5 rounded ${speedStyle.text} ${speedStyle.bg} shadow-sm`}>
                               {info.speedLabel}
                             </span>
                           </div>
@@ -208,12 +234,12 @@ export default function UserSelector() {
         {/* User Summary */}
         <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700/50">
           <div className="flex items-center gap-2">
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center ${userInfo.ctrColor}`}>
-              <User className="w-3 h-3 text-white" />
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center ${selectedCtr.bg}`}>
+              <User className={`${selectedCtr.text} w-3 h-3`} />
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-medium text-gray-900 dark:text-white">
+                <span className="text-xs font-medium text-gray-900 dark:text-gray-100">
                   {selectedUserProfile.userId.replace('USER_', '').replace(/_/g, ' ')}
                 </span>
               </div>
@@ -229,13 +255,13 @@ export default function UserSelector() {
           <div className="flex items-center justify-between">
             <span className="text-gray-500">CTR Category</span>
             <div className="flex items-center gap-1">
-              <span className={`px-1.5 py-0.5 rounded text-white ${userInfo.ctrColor}`}>{userInfo.ctrLabel}</span>
+              <span className={`px-1.5 py-0.5 rounded ${selectedCtr.text} ${selectedCtr.bg}`}>{userInfo.ctrLabel}</span>
               <span className="text-gray-400">({userInfo.ctrScore})</span>
             </div>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-gray-500">Typing Speed</span>
-            <span className={`px-1.5 py-0.5 rounded text-white ${userInfo.speedColor}`}>{userInfo.speedLabel}</span>
+            <span className={`px-1.5 py-0.5 rounded ${selectedSpeed.text} ${selectedSpeed.bg}`}>{userInfo.speedLabel}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-gray-500">Keystroke Interval</span>
