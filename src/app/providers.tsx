@@ -17,6 +17,33 @@ function ThemeSync({ children }: { children: React.ReactNode }) {
     }
   }, [isDarkMode]);
 
+  // Global error handlers to capture unexpected client-side errors (helps debug SyntaxError)
+  useEffect(() => {
+    const onError = (event: ErrorEvent) => {
+      console.error('[GlobalError] error event:', {
+        message: event.message,
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno,
+        error: event.error,
+      });
+    };
+
+    const onUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.error('[GlobalError] unhandledrejection event:', {
+        reason: (event.reason as any)?.toString?.() || event.reason,
+      });
+    };
+
+    window.addEventListener('error', onError);
+    window.addEventListener('unhandledrejection', onUnhandledRejection as any);
+
+    return () => {
+      window.removeEventListener('error', onError);
+      window.removeEventListener('unhandledrejection', onUnhandledRejection as any);
+    };
+  }, []);
+
   return <>{children}</>;
 }
 
