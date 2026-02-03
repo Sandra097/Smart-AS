@@ -154,28 +154,28 @@ export function getAutosuggestConfig(profile: UserProfile | null): AutosuggestCo
   // - Fast/Ultra-fast typing: Trigger only on pause (don't interrupt)
   if (profile.ctrCategory !== 'zero') { // Don't modify if disabled
     switch (profile.typingSpeedCategory) {
-      case 'ultra_fast':
-        // Ultra-fast typers - only show on pause, don't interrupt
+      case 'power_user':
+        // Power users - only show on pause, don't interrupt
         if (triggerMode !== 'disabled') {
           triggerMode = 'pause';
           pauseThresholdMs = Math.max(pauseThresholdMs, 1000);
         }
         break;
       
-      case 'fast':
-        // Fast typers - prefer pause-based triggering
+      case 'regular_user':
+        // Regular users - prefer pause-based triggering
         if (triggerMode === 'continuous' || triggerMode === 'interval') {
           triggerMode = 'pause';
           pauseThresholdMs = Math.max(pauseThresholdMs, 600);
         }
         break;
       
-      case 'moderate':
-        // Moderate typers - keep the CTR-based settings
+      case 'moderate_user':
+        // Moderate users - keep the CTR-based settings
         break;
       
-      case 'slow':
-        // Slow typers - more frequent triggering to help them
+      case 'occasional_user':
+        // Occasional users - more frequent triggering to help them
         if (triggerMode === 'pause') {
           pauseThresholdMs = Math.min(pauseThresholdMs, 400);
         } else if (triggerMode === 'interval') {
@@ -183,8 +183,8 @@ export function getAutosuggestConfig(profile: UserProfile | null): AutosuggestCo
         }
         break;
       
-      case 'very_slow':
-        // Very slow typers - most aggressive triggering
+      case 'new_user':
+        // New users - most aggressive triggering
         if (triggerMode !== 'disabled') {
           triggerMode = 'continuous';
           triggerEveryNChars = 1;
@@ -214,10 +214,10 @@ export function getAutosuggestConfig(profile: UserProfile | null): AutosuggestCo
     showPositionHints: profile.ctrCategory !== 'zero',
     stableOrdering: profile.ctrCategory === 'high' || profile.ctrCategory === 'very_high',
     emphasizeTopResult: profile.ctrCategory !== 'zero',
-    showTypingIndicator: profile.typingSpeedCategory === 'slow' || profile.typingSpeedCategory === 'very_slow',
-    animationSpeed: profile.typingSpeedCategory === 'ultra_fast' || profile.typingSpeedCategory === 'fast' ? 'fast' : 
-                    profile.typingSpeedCategory === 'slow' || profile.typingSpeedCategory === 'very_slow' ? 'slow' : 'normal',
-  };
+    showTypingIndicator: profile.typingSpeedCategory === 'occasional_user' || profile.typingSpeedCategory === 'new_user',
+    animationSpeed: profile.typingSpeedCategory === 'power_user' || profile.typingSpeedCategory === 'regular_user' ? 'fast' : 
+                    profile.typingSpeedCategory === 'occasional_user' || profile.typingSpeedCategory === 'new_user' ? 'slow' : 'normal',
+  }; 
 
   return {
     enabled,
@@ -503,7 +503,6 @@ export function getUserDisplayInfo(profile: UserProfile): {
   speedLabel: string;
   speedBg: string;
   speedText: string;
-  keystrokeInterval: string;
   triggerMode: string;
   triggerDetails: string;
   autosuggestStatus: string;
@@ -524,13 +523,13 @@ export function getUserDisplayInfo(profile: UserProfile): {
   };
 
   const speedLabels: Record<string, { label: string; bg: string; text: string; interval: string }> = {
-    // Compress fast categories into a single 'fast' color, moderate stands alone, slow categories share a hue
-    'ultra_fast': { label: 'Ultra-Fast', bg: 'bg-red-400', text: 'text-white', interval: '≤ 150 ms' },
-    'fast': { label: 'Fast', bg: 'bg-red-400', text: 'text-white', interval: '200–300 ms' },
-    'moderate': { label: 'Moderate', bg: 'bg-yellow-400', text: 'text-gray-900', interval: '400–700 ms' },
-    'slow': { label: 'Slow', bg: 'bg-teal-400', text: 'text-white', interval: '1–2 s' },
-    'very_slow': { label: 'Very Slow', bg: 'bg-teal-600', text: 'text-white', interval: '2–4 s' },
-  }; 
+    // Copilot usage tiers (fewer hues, clearer grouping)
+    'power_user': { label: 'Power User', bg: 'bg-red-400', text: 'text-white', interval: '≤ 150 ms' },
+    'regular_user': { label: 'Regular User', bg: 'bg-red-400', text: 'text-white', interval: '200–300 ms' },
+    'moderate_user': { label: 'Moderate User', bg: 'bg-yellow-400', text: 'text-gray-900', interval: '400–700 ms' },
+    'occasional_user': { label: 'Occasional User', bg: 'bg-teal-400', text: 'text-white', interval: '1–2 s' },
+    'new_user': { label: 'New User', bg: 'bg-teal-600', text: 'text-white', interval: '2–4 s' },
+  };  
 
   // Get config based on profile to determine actual trigger behavior
   const config = getAutosuggestConfig(profile);
@@ -588,7 +587,6 @@ export function getUserDisplayInfo(profile: UserProfile): {
     speedLabel: speedInfo.label,
     speedBg: speedInfo.bg,
     speedText: speedInfo.text,
-    keystrokeInterval: speedInfo.interval,
     triggerMode: triggerInfo.mode,
     triggerDetails: triggerInfo.details,
     autosuggestStatus: triggerInfo.status,

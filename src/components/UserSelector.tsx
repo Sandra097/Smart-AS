@@ -60,6 +60,29 @@ export default function UserSelector() {
   }
 
   if (!isLoaded || !selectedUserProfile) {
+    // If loading failed, show error details and a quick reload action to help debugging
+    if (error) {
+      return (
+        <div className="flex flex-col gap-2 px-4 py-3 bg-white dark:bg-gray-800 border-2 border-red-300 dark:border-red-600 rounded-xl shadow-lg w-72">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-red-400 rounded-full flex items-center justify-center">
+              <User className="w-4 h-4 text-white" />
+            </div>
+            <span className="text-sm font-semibold text-red-600 dark:text-red-400">Failed to load user data</span>
+          </div>
+          <div className="text-xs text-gray-500 dark:text-gray-300 break-words">{error}</div>
+          <div className="flex justify-end">
+            <button
+              onClick={() => window.location.reload()}
+              className="text-sm px-3 py-1 rounded bg-blue-50 dark:bg-blue-900/20 text-blue-600 hover:bg-blue-100 transition"
+            >
+              Reload
+            </button>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="flex items-center gap-2 px-4 py-3 bg-white dark:bg-gray-800 border-2 border-red-300 dark:border-red-600 rounded-xl shadow-lg">
         <div className="w-6 h-6 bg-red-400 rounded-full flex items-center justify-center">
@@ -122,11 +145,11 @@ export default function UserSelector() {
   };
 
   const SPEED_STYLES: Record<string, { bg: string; text: string }> = {
-    ultra_fast: { bg: 'bg-red-400', text: 'text-white' },
-    fast: { bg: 'bg-red-400', text: 'text-white' },
-    moderate: { bg: 'bg-yellow-400', text: 'text-gray-900' },
-    slow: { bg: 'bg-teal-400', text: 'text-white' },
-    very_slow: { bg: 'bg-teal-600', text: 'text-white' },
+    power_user: { bg: 'bg-red-400', text: 'text-white' },
+    regular_user: { bg: 'bg-red-400', text: 'text-white' },
+    moderate_user: { bg: 'bg-yellow-400', text: 'text-gray-900' },
+    occasional_user: { bg: 'bg-teal-400', text: 'text-white' },
+    new_user: { bg: 'bg-teal-600', text: 'text-white' },
   };
 
   // Selected user styles (avoid dynamic class strings so Tailwind includes them)
@@ -260,13 +283,10 @@ export default function UserSelector() {
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-gray-500">Typing Speed</span>
+            <span className="text-gray-500">Copilot Usage</span>
             <span className={`px-1.5 py-0.5 rounded ${selectedSpeed.text} ${selectedSpeed.bg}`}>{userInfo.speedLabel}</span>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-gray-500">Keystroke Interval</span>
-            <span className="font-medium text-gray-700 dark:text-gray-300">{userInfo.keystrokeInterval}</span>
-          </div>
+
           <div className="flex items-center justify-between">
             <span className="text-gray-500">Region</span>
             <span className="font-medium text-gray-700 dark:text-gray-300">{selectedUserProfile.region.toUpperCase()}</span>

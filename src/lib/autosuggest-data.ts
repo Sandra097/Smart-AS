@@ -36,7 +36,7 @@ export interface UserProfile {
   
   // Typing behavior
   avgTypingSpeedMs: number;
-  typingSpeedCategory: 'ultra_fast' | 'fast' | 'moderate' | 'slow' | 'very_slow';
+  typingSpeedCategory: 'power_user' | 'regular_user' | 'moderate_user' | 'occasional_user' | 'new_user';
   typingSpeedRank: number;    // 1 = fastest, 5 = slowest
   
   // Usage patterns
@@ -214,24 +214,29 @@ export function buildUserProfiles(entries: AutosuggestLogEntry[]): Map<string, U
     else if (ctr < 0.6) ctrCategory = 'high';
     else ctrCategory = 'very_high';
     
-    // Calculate typing speed
+    // Calculate typing speed and map to Copilot usage tiers
     const avgTypingSpeedMs = calculateTypingSpeed(entries);
     let typingSpeedCategory: UserProfile['typingSpeedCategory'];
     let typingSpeedRank: number;
     if (avgTypingSpeedMs <= 150) {
-      typingSpeedCategory = 'ultra_fast';
+      // Very fast typing -> Power user
+      typingSpeedCategory = 'power_user';
       typingSpeedRank = 1;
     } else if (avgTypingSpeedMs <= 300) {
-      typingSpeedCategory = 'fast';
+      // Fast typing -> Regular user
+      typingSpeedCategory = 'regular_user';
       typingSpeedRank = 2;
     } else if (avgTypingSpeedMs <= 700) {
-      typingSpeedCategory = 'moderate';
+      // Moderate typing -> Moderate user
+      typingSpeedCategory = 'moderate_user';
       typingSpeedRank = 3;
     } else if (avgTypingSpeedMs <= 2000) {
-      typingSpeedCategory = 'slow';
+      // Slow typing -> Occasional user
+      typingSpeedCategory = 'occasional_user';
       typingSpeedRank = 4;
     } else {
-      typingSpeedCategory = 'very_slow';
+      // Very slow typing -> New user
+      typingSpeedCategory = 'new_user';
       typingSpeedRank = 5;
     }
     
@@ -365,7 +370,7 @@ export function getPredefinedUserProfiles(): Map<string, UserProfile> {
     ctrScore: 0.00,
     ctrCategory: 'zero',
     avgTypingSpeedMs: 120,
-    typingSpeedCategory: 'ultra_fast',
+    typingSpeedCategory: 'power_user',
     typingSpeedRank: 1,
     totalCVIDs: 1,
     avgEventsPerCVID: 8,
@@ -390,7 +395,7 @@ export function getPredefinedUserProfiles(): Map<string, UserProfile> {
     ctrScore: 0.05,
     ctrCategory: 'low',
     avgTypingSpeedMs: 250,
-    typingSpeedCategory: 'fast',
+    typingSpeedCategory: 'regular_user',
     typingSpeedRank: 2,
     totalCVIDs: 1,
     avgEventsPerCVID: 8,
@@ -415,7 +420,7 @@ export function getPredefinedUserProfiles(): Map<string, UserProfile> {
     ctrScore: 0.15,
     ctrCategory: 'medium',
     avgTypingSpeedMs: 550,
-    typingSpeedCategory: 'moderate',
+    typingSpeedCategory: 'moderate_user',
     typingSpeedRank: 3,
     totalCVIDs: 1,
     avgEventsPerCVID: 8,
@@ -440,7 +445,7 @@ export function getPredefinedUserProfiles(): Map<string, UserProfile> {
     ctrScore: 0.25,
     ctrCategory: 'high',
     avgTypingSpeedMs: 1500,
-    typingSpeedCategory: 'slow',
+    typingSpeedCategory: 'occasional_user',
     typingSpeedRank: 4,
     totalCVIDs: 3,
     avgEventsPerCVID: 4,
@@ -465,7 +470,7 @@ export function getPredefinedUserProfiles(): Map<string, UserProfile> {
     ctrScore: 0.35,
     ctrCategory: 'very_high',
     avgTypingSpeedMs: 3000,
-    typingSpeedCategory: 'very_slow',
+    typingSpeedCategory: 'new_user',
     typingSpeedRank: 5,
     totalCVIDs: 4,
     avgEventsPerCVID: 4,
