@@ -29,6 +29,7 @@ export default function UserSelector() {
   const {
     isLoaded,
     isLoading,
+    error,
     availableUsers,
     selectedUserId,
     selectedUserProfile,
